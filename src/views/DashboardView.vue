@@ -13,7 +13,7 @@
             <ph-microphone
               :size="32"
               class="icons"
-              @click="ToggleMic"
+              @click="ToggleMic()"
               :class="isRecording === true ? 'active' : 'dis'"
             />
             <ph-arrow-circle-right
@@ -37,6 +37,54 @@ import NavbarView from "../components/NavbarView.vue";
 import MessageView from "../components/messageView.vue";
 
 // variables
+
+// speech Recognition variables
+const isRecording = ref(false);
+// const micActivity = ref(false);
+
+const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const sr = new Recognition();
+
+onMounted(() => {
+  const scrollDiv = document.querySelector(".message-container");
+  console.log(scrollDiv.scrollIntoView);
+  sr.continuous = false;
+  sr.interimResults = true;
+
+  sr.onstart = () => {
+    console.log("SR Started");
+    isRecording.value = true;
+  };
+
+  sr.onend = () => {
+    console.log("SR Stopped");
+    isRecording.value = false;
+    messageSent();
+  };
+
+  sr.onresult = (evt) => {
+    for (let i = 0; i < evt.results.length; i++) {
+      const result = evt.results[i];
+
+      if (result.isFinal) CheckForCommand(result);
+    }
+
+    const t = Array.from(evt.results)
+      .map((result) => result[0])
+      .map((result) => result.transcript)
+      .join("");
+
+    inputText.value = t;
+  };
+});
+
+const ToggleMic = () => {
+  if (isRecording.value) {
+    sr.stop();
+  } else {
+    sr.start();
+  }
+};
 
 const inputFreeze = ref(false);
 const chats = ref([]);
@@ -89,20 +137,21 @@ const fetchResponse = async (input) => {
 
 const generateAndPlayAudio = async (text) => {
   try {
-    const mp3 = await openai.audio.speech.create({
+    const response = await openai.audio.speech.create({
       model: "tts-1",
       voice: "nova",
-      input: text, // Use the passed text here
+      input: text,
     });
 
     // Assuming mp3.data is an ArrayBuffer
-    const arrayBuffer = await mp3.arrayBuffer();
+    const arrayBuffer = await response.arrayBuffer();
 
     // Create a Blob from the ArrayBuffer
     const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
 
     // Create an audio element and play the Blob
-    const audio = new Audio(URL.createObjectURL(blob));
+    const audio = new Audio();
+    audio.src = URL.createObjectURL(blob);
     audio.play();
   } catch (error) {
     console.error("An error occurred:", error);
