@@ -1,12 +1,12 @@
 <template>
   <div>
-    <LoginViewVue />
+    <router-view />
   </div>
 </template>
 
 <script setup>
 // imports
-import LoginViewVue from "./components/LoginView.vue";
+// import LoginViewVue from "./components/LoginView.vue";
 </script>
 
 <style></style>

@@ -25,7 +25,7 @@ const profileExistence = ref(false);
 const login = async (email, password) => {
   isPending.value = true
   error.value = null
-  profileExistence.value = false;
+  profileExistence.value = false; 
   
   try {
     const res = await signInWithEmailAndPassword(firebaseAuth, email, password)

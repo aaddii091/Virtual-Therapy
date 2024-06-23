@@ -1,5 +1,18 @@
 import { createApp } from 'vue'
 import './index.css'
+import { createPinia } from 'pinia';
 import App from './App.vue'
+import router from './router/index.js'
+import PhosphorIcons from "@phosphor-icons/vue" 
 
-createApp(App).mount('#app')
+// SWAL SWEET ALERTS GLOBAL CONFIG
+import VueSweetalert2 from 'vue-sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+
+const pinia = createPinia();
+const app = createApp(App);
+
+app.use(PhosphorIcons)
+app.use(VueSweetalert2);
+app.use(pinia);
+app.use(router).mount('#app');

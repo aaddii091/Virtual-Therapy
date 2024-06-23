@@ -9,10 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@phosphor-icons/vue": "^2.1.6",
+    "axios": "^1.7.2",
     "firebase": "^10.12.2",
+    "openai": "^4.52.0",
+    "pinia": "^2.1.7",
     "sweetalert2": "^11.11.1",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.3"
+    "vue-router": "^4.3.3",
+    "vue-sweetalert2": "^5.0.11"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",

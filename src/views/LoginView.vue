@@ -101,8 +101,9 @@
 <script setup>
 // imports
 import { onMounted, ref } from "vue";
-import userLogin from "../composable/userLogin";
 import { useRouter } from "vue-router";
+import userLogin from "../composable/userLogin";
+// import { useRouter } from "vue-router";
 
 // variables
 const email = ref("");
@@ -119,8 +120,13 @@ const handleSubmit = async () => {
   await login(email.value, password.value);
   if (!error.value) {
     if (profileExistence.value) {
-      console.log(userObj);
-      router.push({ name: "dashboard" });
+      console.log(userObj.value);
+      // change this 
+      if (!userObj.value.onBoarded === false) {
+        router.push("/onboarding");
+      } else {
+        router.push("/dashboard");
+      }
     } else {
       console.log("Failed");
       //   router.push({ name: "complete-registration" });
