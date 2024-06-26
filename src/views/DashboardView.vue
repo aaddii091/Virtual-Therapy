@@ -1,9 +1,10 @@
 <template>
   <div>
-    <div class="container">
+    <test-view class="audio-visualizer" @customEvent="ToggleMic()" />
+    <div class="container" v-if="toggleState">
       <div class="message-container no-scroll-display">
         <div class="messages" v-for="data in chats" :key="data.id">
-          <MessageView :message="data.content" :role="data.role" />
+          <!-- <MessageView :message="data.content" :role="data.role" /> -->
         </div>
       </div>
       <form @submit.prevent="messageSent()">
@@ -26,6 +27,25 @@
         </div>
       </form>
     </div>
+    <form @submit.prevent="messageSent()" v-if="!toggleState">
+      <div class="search-bar">
+        <div class="search-inner">
+          <input type="text" v-model="inputText" />
+          <ph-microphone
+            :size="32"
+            class="icons"
+            @click="ToggleMic()"
+            :class="isRecording === true ? 'active' : 'dis'"
+          />
+          <ph-arrow-circle-right
+            :size="32"
+            class="icons tick"
+            @click="messageSent()"
+            @keypress.enter="messageSent()"
+          />
+        </div>
+      </div>
+    </form>
   </div>
 </template>
 
@@ -35,8 +55,14 @@ import OpenAI from "openai";
 import { onMounted, ref } from "vue";
 import NavbarView from "../components/NavbarView.vue";
 import MessageView from "../components/messageView.vue";
+import TestView from "./TestView.vue";
+import { useStore } from "../store/store";
+
+//intializing store
+const store = useStore();
 
 // variables
+const toggleState = ref(store.toggleSidebarState);
 
 // speech Recognition variables
 const isRecording = ref(false);
@@ -79,6 +105,7 @@ onMounted(() => {
 });
 
 const ToggleMic = () => {
+  console.log('Running');
   if (isRecording.value) {
     sr.stop();
   } else {
@@ -113,6 +140,11 @@ const fetchResponse = async (input) => {
     const completion = await openai.chat.completions.create({
       max_tokens: 1000,
       messages: [
+        {
+          role: "system",
+          content:
+            "I want you to act as a cognitive behavioural therapist. You are supposed to be the first one to initiate a conversation. You are supposed to do everything that a cognitive behavioural therapist would do to make your client feel better and motivated after the talk. I want you to keep your replies neat, limiting your replies strictly to a maximum of 100 words. Maintain a humble and sensitive tone towards the client and behave exactly like a cognitive behavioural therapist. Remember to not jump on to the solutions of their problems. First explore what exactly they are feeling about their problems. Motivate them to suggest solutions of their own problems as much as possible. If they aren't able to then ask if you should suggest some solution. If they say yes then only you should start providing solutions form your side. Provide emotional support to them doesn't matter what happens . Remember to never end the conversation from your side. If the clients gives a list of reasons for their mental disturbance then cater to them one by one but don't forget about even one of them. If they forget then it;s your responsibility to bring the reason up again but implicitly so that they elaborate upon it. Behave like an experienced cognitive behavioural therapist at all costs.",
+        },
         ...chats.value,
         {
           role: "user",
@@ -215,5 +247,13 @@ const generateAndPlayAudio = async (text) => {
   margin: 7px 10px 0px 0px;
   border-radius: 25px;
   filter: invert(100%);
+}
+@media (min-width: 1280px) {
+  .container {
+    max-width: -webkit-fill-available;
+  }
+}
+.audio-visuailizer {
+  height: 100% !important;
 }
 </style>

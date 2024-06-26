@@ -4,6 +4,7 @@ import Login from '../views/LoginView.vue';
 import Dashboard from '../views/DashboardView.vue';
 import Signup from '../views/SignupView.vue';
 import OnBoarding from '../views/OnboardingView.vue'
+import Test from '../views/TestView.vue'
 // import NotFound from './../components/notFoundView.vue';
 
 
@@ -29,6 +30,11 @@ const routes = [
     path: '/onboarding',
     name: 'Onboarding',
     component: OnBoarding,
+    meta: { requiresAuth: false },
+  },{
+    path: '/test',
+    name: 'Test',
+    component: Test,
     meta: { requiresAuth: false },
   },
   {
