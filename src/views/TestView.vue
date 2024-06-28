@@ -1,12 +1,38 @@
 <template>
-  <canvas ref="canvas"></canvas>
+  <canvas ref="canvas" @startAudio="start()"></canvas>
   <button @click="start">Start</button>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  watch,
+  computed,
+  defineProps,
+} from "vue";
+import { useStore } from "../store/store";
+
+const props = defineProps({
+  audioStream: {
+    type: Object,
+    required: true,
+  },
+});
+
+const store = useStore();
+const test = computed(() => {
+  return store.audios;
+});
 
 const emit = defineEmits(["customEvent"]);
+
+console.log(store.audios);
+if (store.mic) {
+  start();
+  store.updateMic(false);
+}
 
 const canvas = ref(null);
 const WIDTH = 1000;
@@ -14,6 +40,7 @@ const HEIGHT = 700;
 let context;
 let analyser;
 let freqs;
+let ctx = ref(null);
 
 const opts = {
   smoothing: 0.6,
@@ -33,23 +60,13 @@ const opts = {
 };
 
 const shuffle = [1, 3, 0, 4, 2];
-const ctx = ref(null);
 
-navigator.getUserMedia =
-  navigator.getUserMedia ||
-  navigator.webkitGetUserMedia ||
-  navigator.mozGetUserMedia ||
-  navigator.msGetUserMedia;
-
-function onStream(stream) {
-  const input = context.createMediaStreamSource(stream);
+function onStream(audio) {
+  const input = context.createMediaElementSource(audio);
   input.connect(analyser);
+  analyser.connect(context.destination);
   requestAnimationFrame(visualize);
-}
-
-function onStreamError(e) {
-  document.body.innerHTML = "";
-  console.error(e);
+  audio.play();
 }
 
 function range(i) {
@@ -85,21 +102,21 @@ function path(channel) {
 
   ctx.value.beginPath();
   ctx.value.moveTo(0, m);
-  ctx.value.lineTo(x[0], m + 1);
-  ctx.value.bezierCurveTo(x[1], m + 1, x[2], y[0], x[3], y[0]);
-  ctx.value.bezierCurveTo(x[4], y[0], x[4], y[1], x[5], y[1]);
-  ctx.value.bezierCurveTo(x[6], y[1], x[6], y[2], x[7], y[2]);
-  ctx.value.bezierCurveTo(x[8], y[2], x[8], y[3], x[9], y[3]);
-  ctx.value.bezierCurveTo(x[10], y[3], x[10], y[4], x[11], y[4]);
-  ctx.value.bezierCurveTo(x[12], y[4], x[12], m, x[13], m);
+  ctx.value.lineTo(x[0], m);
+  ctx.value.bezierCurveTo(x[1], m, x[1], y[0], x[2], y[0]);
+  ctx.value.bezierCurveTo(x[3], y[0], x[3], y[1], x[4], y[1]);
+  ctx.value.bezierCurveTo(x[5], y[1], x[5], y[2], x[6], y[2]);
+  ctx.value.bezierCurveTo(x[7], y[2], x[7], y[3], x[8], y[3]);
+  ctx.value.bezierCurveTo(x[9], y[3], x[9], y[4], x[10], y[4]);
+  ctx.value.bezierCurveTo(x[11], y[4], x[11], m, x[12], m);
   ctx.value.lineTo(1000, m + 1);
-  ctx.value.lineTo(x[13], m - 1);
-  ctx.value.bezierCurveTo(x[12], m, x[12], h - y[4], x[11], h - y[4]);
-  ctx.value.bezierCurveTo(x[10], h - y[4], x[10], h - y[3], x[9], h - y[3]);
-  ctx.value.bezierCurveTo(x[8], h - y[3], x[8], h - y[2], x[7], h - y[2]);
-  ctx.value.bezierCurveTo(x[6], h - y[2], x[6], h - y[1], x[5], h - y[1]);
-  ctx.value.bezierCurveTo(x[4], h - y[1], x[4], h - y[0], x[3], h - y[0]);
-  ctx.value.bezierCurveTo(x[2], h - y[0], x[1], m, x[0], m);
+  ctx.value.lineTo(x[12], m - 1);
+  ctx.value.bezierCurveTo(x[11], m, x[11], h - y[4], x[10], h - y[4]);
+  ctx.value.bezierCurveTo(x[9], h - y[4], x[9], h - y[3], x[8], h - y[3]);
+  ctx.value.bezierCurveTo(x[7], h - y[3], x[7], h - y[2], x[6], h - y[2]);
+  ctx.value.bezierCurveTo(x[5], h - y[2], x[5], h - y[1], x[4], h - y[1]);
+  ctx.value.bezierCurveTo(x[3], h - y[1], x[3], h - y[0], x[2], h - y[0]);
+  ctx.value.bezierCurveTo(x[1], h - y[0], x[1], m, x[0], m);
   ctx.value.lineTo(0, m);
   ctx.value.fill();
   ctx.value.stroke();
@@ -125,8 +142,10 @@ function start() {
   context = new AudioContext();
   analyser = context.createAnalyser();
   freqs = new Uint8Array(analyser.frequencyBinCount);
-  document.querySelector("button").remove();
-  navigator.getUserMedia({ audio: true }, onStream, onStreamError);
+  if (document.querySelector("button")) {
+    document.querySelector("button").remove();
+  }
+  onStream(store.audios);
 }
 
 onMounted(() => {
@@ -138,6 +157,8 @@ onBeforeUnmount(() => {
     context.close();
   }
 });
+
+defineExpose({ start });
 </script>
 
 <style scoped>

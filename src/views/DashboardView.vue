@@ -1,6 +1,10 @@
 <template>
   <div>
-    <test-view class="audio-visualizer" @customEvent="ToggleMic()" />
+    <test-view
+      class="audio-visualizer"
+      @customEvent="ToggleMic()"
+      ref="startAudio"
+    />
     <div class="container" v-if="toggleState">
       <div class="message-container no-scroll-display">
         <div class="messages" v-for="data in chats" :key="data.id">
@@ -14,7 +18,7 @@
             <ph-microphone
               :size="32"
               class="icons"
-              @click="ToggleMic()"
+              @click="ToggleMic"
               :class="isRecording === true ? 'active' : 'dis'"
             />
             <ph-arrow-circle-right
@@ -34,7 +38,7 @@
           <ph-microphone
             :size="32"
             class="icons"
-            @click="ToggleMic()"
+            @click="ToggleMic"
             :class="isRecording === true ? 'active' : 'dis'"
           />
           <ph-arrow-circle-right
@@ -53,27 +57,23 @@
 // imports
 import OpenAI from "openai";
 import { onMounted, ref } from "vue";
-import NavbarView from "../components/NavbarView.vue";
-import MessageView from "../components/messageView.vue";
 import TestView from "./TestView.vue";
 import { useStore } from "../store/store";
 
-//intializing store
+// initializing store
 const store = useStore();
 
 // variables
 const toggleState = ref(store.toggleSidebarState);
+const audioStream = ref(null);
+const startAudio = ref(null);
 
 // speech Recognition variables
 const isRecording = ref(false);
-// const micActivity = ref(false);
-
 const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const sr = new Recognition();
 
 onMounted(() => {
-  const scrollDiv = document.querySelector(".message-container");
-  console.log(scrollDiv.scrollIntoView);
   sr.continuous = false;
   sr.interimResults = true;
 
@@ -91,7 +91,6 @@ onMounted(() => {
   sr.onresult = (evt) => {
     for (let i = 0; i < evt.results.length; i++) {
       const result = evt.results[i];
-
       if (result.isFinal) CheckForCommand(result);
     }
 
@@ -105,12 +104,14 @@ onMounted(() => {
 });
 
 const ToggleMic = () => {
-  console.log('Running');
+  console.log("ToggleMic called");
+  console.log("isRecording before:", isRecording.value);
   if (isRecording.value) {
     sr.stop();
   } else {
     sr.start();
   }
+  console.log("isRecording after:", isRecording.value);
 };
 
 const inputFreeze = ref(false);
@@ -142,8 +143,7 @@ const fetchResponse = async (input) => {
       messages: [
         {
           role: "system",
-          content:
-            "I want you to act as a cognitive behavioural therapist. You are supposed to be the first one to initiate a conversation. You are supposed to do everything that a cognitive behavioural therapist would do to make your client feel better and motivated after the talk. I want you to keep your replies neat, limiting your replies strictly to a maximum of 100 words. Maintain a humble and sensitive tone towards the client and behave exactly like a cognitive behavioural therapist. Remember to not jump on to the solutions of their problems. First explore what exactly they are feeling about their problems. Motivate them to suggest solutions of their own problems as much as possible. If they aren't able to then ask if you should suggest some solution. If they say yes then only you should start providing solutions form your side. Provide emotional support to them doesn't matter what happens . Remember to never end the conversation from your side. If the clients gives a list of reasons for their mental disturbance then cater to them one by one but don't forget about even one of them. If they forget then it;s your responsibility to bring the reason up again but implicitly so that they elaborate upon it. Behave like an experienced cognitive behavioural therapist at all costs.",
+          content: "I want you to act as a cognitive behavioural therapist...",
         },
         ...chats.value,
         {
@@ -156,11 +156,9 @@ const fetchResponse = async (input) => {
     });
 
     inputFreeze.value = false;
-    // adding to stack
     const fullResponse = completion.choices[0].message.content;
     chats.value.push({ role: "system", content: fullResponse });
 
-    // Generate and play TTS audio for the full response
     await generateAndPlayAudio(fullResponse);
   } catch (error) {
     console.error("Error fetching ChatGPT response:", error);
@@ -175,16 +173,15 @@ const generateAndPlayAudio = async (text) => {
       input: text,
     });
 
-    // Assuming mp3.data is an ArrayBuffer
     const arrayBuffer = await response.arrayBuffer();
-
-    // Create a Blob from the ArrayBuffer
     const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
-
-    // Create an audio element and play the Blob
     const audio = new Audio();
     audio.src = URL.createObjectURL(blob);
-    audio.play();
+    audioStream.value = new Audio(audio.src);
+     store.updateAudio(audioStream);
+    store.updateMic(true);
+    console.log( startAudio.value);
+    startAudio.value.start()
   } catch (error) {
     console.error("An error occurred:", error);
   }
@@ -253,7 +250,7 @@ const generateAndPlayAudio = async (text) => {
     max-width: -webkit-fill-available;
   }
 }
-.audio-visuailizer {
+.audio-visualizer {
   height: 100% !important;
 }
 </style>
