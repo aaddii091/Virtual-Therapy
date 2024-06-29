@@ -5,7 +5,7 @@ import Dashboard from '../views/DashboardView.vue';
 import Signup from '../views/SignupView.vue';
 import OnBoarding from '../views/OnboardingView.vue'
 import Test from '../views/TestView.vue'
-// import NotFound from './../components/notFoundView.vue';
+import NotFound from '../views/404View.vue'
 
 
 const routes = [
@@ -41,11 +41,11 @@ const routes = [
     path: '/',
     redirect: '/login',
   },
-//   {
-//     path: '/:catchAll(.*)',
-//     name: '404-not-found',
-//     component: NotFound,
-//   },
+  {
+    path: '/:catchAll(.*)',
+    name: '404-not-found',
+    component: NotFound,
+  },
 
 ];
 

@@ -188,5 +188,11 @@ button {
   padding: 0.5em 1.5em;
   border: none;
   background: rgba(255, 255, 255, 0.8);
+  transition: all 0.5s;
+}
+button:hover {
+  transition: all 0.5s;
+  padding: 0.65em 1.75em;
+  box-shadow: rgba(255, 255, 255, 0.2) 0px 7px 29px 0px;
 }
 </style>

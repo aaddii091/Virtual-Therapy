@@ -59,6 +59,7 @@ import OpenAI from "openai";
 import { onMounted, ref } from "vue";
 import TestView from "./TestView.vue";
 import { useStore } from "../store/store";
+import "../assets/dashboard.css";
 
 // initializing store
 const store = useStore();
@@ -137,31 +138,59 @@ const openai = new OpenAI({
 const fetchResponse = async (input) => {
   console.log(chats.value);
   inputFreeze.value = true;
+
   try {
-    const completion = await openai.chat.completions.create({
-      max_tokens: 1000,
-      messages: [
-        {
-          role: "system",
-          content: "I want you to act as a cognitive behavioural therapist...",
-        },
-        ...chats.value,
-        {
-          role: "user",
-          content: input,
-        },
-      ],
-      model: "gpt-3.5-turbo",
-      stream: false,
+    // Create assistant
+    const assistant = await openai.beta.assistants.create({
+      name: "Virtual Therapist",
+      instructions: "You are a Virtual Therapist.",
+      model: "gpt-3.5-turbo-0125",
     });
 
-    inputFreeze.value = false;
-    const fullResponse = completion.choices[0].message.content;
-    chats.value.push({ role: "system", content: fullResponse });
+    // Create thread
+    const thread = { id: "thread_YN9Np0rKzWrcGTRve89nJBZl" };
+    console.log("thread id;-", thread);
 
-    await generateAndPlayAudio(fullResponse);
+    // Send user message to the thread
+    const userMessage = await openai.beta.threads.messages.create(thread.id, {
+      role: "user",
+      content: input,
+    });
+
+    // Run the assistant
+    const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
+      assistant_id: assistant.id,
+      instructions: "u r my assistant",
+    });
+
+    if (run.status === "completed") {
+      // Get the messages from the thread
+      const messages = await openai.beta.threads.messages.list(run.thread_id);
+
+      // Log the messages
+      for (const message of messages.data.reverse()) {
+        console.log(`${message.role} > ${message.content[0].text.value}`);
+      }
+
+      // Extract the full response from the assistant
+      const assistantMessage = messages.data.find(
+        (message) => message.role === "assistant"
+      );
+      const fullResponse = assistantMessage.content[0].text.value;
+
+      // Push the response to the chats array
+      chats.value.push({ role: "system", content: fullResponse });
+
+      // Generate and play audio
+      await generateAndPlayAudio(fullResponse);
+    } else {
+      console.log(run.status);
+    }
+
+    inputFreeze.value = false;
   } catch (error) {
     console.error("Error fetching ChatGPT response:", error);
+    inputFreeze.value = false;
   }
 };
 
@@ -178,10 +207,10 @@ const generateAndPlayAudio = async (text) => {
     const audio = new Audio();
     audio.src = URL.createObjectURL(blob);
     audioStream.value = new Audio(audio.src);
-     store.updateAudio(audioStream);
+    store.updateAudio(audioStream);
     store.updateMic(true);
-    console.log( startAudio.value);
-    startAudio.value.start()
+    console.log(startAudio.value);
+    startAudio.value.start();
   } catch (error) {
     console.error("An error occurred:", error);
   }
@@ -189,6 +218,7 @@ const generateAndPlayAudio = async (text) => {
 </script>
 
 <style scoped>
+@import url("../assets/dashboard.css");
 .messages {
   background-color: rgba(240, 248, 255, 0);
 }
