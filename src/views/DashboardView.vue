@@ -47,6 +47,12 @@
             @click="messageSent()"
             @keypress.enter="messageSent()"
           />
+          <PhCheckCircle
+            :size="32"
+            class="icons"
+            @click="renderReport()"
+            :class="chats.length !== 4 ? '' : 'none'"
+          />
         </div>
       </div>
     </form>
@@ -60,6 +66,8 @@ import { onMounted, ref } from "vue";
 import TestView from "./TestView.vue";
 import { useStore } from "../store/store";
 import "../assets/dashboard.css";
+import { jsPDF } from "jspdf";
+import generateReport from "../composable/generateReport";
 
 // initializing store
 const store = useStore();
@@ -68,6 +76,14 @@ const store = useStore();
 const toggleState = ref(store.toggleSidebarState);
 const audioStream = ref(null);
 const startAudio = ref(null);
+const inputFreeze = ref(false);
+const chats = ref([]);
+const inputText = ref("");
+
+console.log(chats.value.length);
+
+// composable
+const { report } = generateReport();
 
 // speech Recognition variables
 const isRecording = ref(false);
@@ -104,6 +120,145 @@ onMounted(() => {
   };
 });
 
+const renderReport = async () => {
+  await generateAndPlayAudio(
+    "Thank you for the session. We are currently generating a comprehensive report, which will soon be available for download."
+  );
+
+  const reportDetails = await report(chats.value);
+  console.log(reportDetails);
+  const doc = new jsPDF();
+
+  // Title
+  doc.setFontSize(22);
+  doc.setTextColor(40, 40, 40);
+  doc.text("Detailed Report", 20, 20);
+
+  // Subtitle
+  doc.setFontSize(16);
+  doc.setTextColor(100, 100, 100);
+  doc.text("Generated on: " + new Date().toLocaleDateString(), 20, 30);
+
+  // Horizontal line
+  doc.setLineWidth(0.5);
+  doc.line(20, 35, 190, 35);
+
+  // Function to handle long text and prevent overflow
+  const formatText = (text, maxLength = 60) => {
+    if (text && text.length > maxLength) {
+      return text.substring(0, maxLength - 3) + "...";
+    }
+    return text || "";
+  };
+
+  // User Profile Summary
+  doc.setFontSize(18);
+  doc.setTextColor(40, 40, 40);
+  doc.text("1. User Profile Summary", 20, 45);
+
+  doc.setFontSize(12);
+  doc.setTextColor(50, 50, 50);
+  doc.text(
+    `• Name: ${formatText(reportDetails.clientInformation.name)}`,
+    20,
+    55
+  );
+  doc.text(`• Age: ${reportDetails.clientInformation.dateOfBirth}`, 20, 65);
+  doc.text(`• Gender: ${reportDetails.clientInformation.gender}`, 20, 75);
+  doc.text(
+    `• Email: ${formatText(reportDetails.clientInformation.email)}`,
+    20,
+    85
+  );
+
+  // Mental Health Overview
+  doc.setFontSize(18);
+  doc.setTextColor(40, 40, 40);
+  doc.text("2. Mental Health Overview", 20, 100);
+
+  doc.setFontSize(12);
+  doc.setTextColor(50, 50, 50);
+  doc.text(
+    `• Reason for Seeking Therapy: ${formatText(
+      reportDetails.presentingProblem.reasonForSeekingTherapy
+    )}`,
+    20,
+    110
+  );
+  doc.text(
+    `• Current Issues and Symptoms: ${formatText(
+      reportDetails.presentingProblem.currentIssuesAndSymptoms
+    )}`,
+    20,
+    120
+  );
+  doc.text(
+    `• Diagnosed Conditions: ${formatText(
+      reportDetails.backgroundInformation.relevantMedicalAndPsychologicalHistory
+    )}`,
+    20,
+    130
+  );
+  doc.text(
+    `• Previous Therapy or Treatment: ${formatText(
+      reportDetails.previousTherapyOrTreatment || "First Therapy Session"
+    )}`,
+    20,
+    140
+  );
+
+  // Progress and Trends
+  doc.setFontSize(18);
+  doc.setTextColor(40, 40, 40);
+  doc.text("3. Progress and Trends", 20, 155);
+
+  doc.setFontSize(12);
+  doc.setTextColor(50, 50, 50);
+  doc.text(
+    `• Client's Mood and Behavior During Session: ${formatText(
+      reportDetails.sessionSummary.clientsMoodAndBehaviorDuringSession
+    )}`,
+    20,
+    165
+  );
+  doc.text(
+    `• Key Insights and Observations: ${formatText(
+      reportDetails.sessionSummary.keyInsightsAndObservations
+    )}`,
+    20,
+    175
+  );
+  doc.text(
+    `• Short-term Goals: ${formatText(
+      reportDetails.therapeuticGoals.shortTermGoals
+    )}`,
+    20,
+    185
+  );
+  doc.text(
+    `• Long-term Goals: ${formatText(
+      reportDetails.therapeuticGoals.longTermGoals
+    )}`,
+    20,
+    195
+  );
+
+  // Footer
+  doc.setFontSize(10);
+  doc.setTextColor(150, 150, 150);
+  doc.text(
+    "ZenGarden - Created by a Virtual Therapist",
+    105,
+    290,
+    null,
+    null,
+    "center"
+  );
+
+  // Save the PDF
+  doc.save("detailed_report.pdf");
+};
+
 const ToggleMic = () => {
   console.log("ToggleMic called");
   console.log("isRecording before:", isRecording.value);
@@ -114,10 +269,6 @@ const ToggleMic = () => {
   }
   console.log("isRecording after:", isRecording.value);
 };
-
-const inputFreeze = ref(false);
-const chats = ref([]);
-const inputText = ref("");
 
 const messageSent = () => {
   if (inputText.value !== "" && !inputFreeze.value) {
@@ -138,59 +289,31 @@ const openai = new OpenAI({
 const fetchResponse = async (input) => {
   console.log(chats.value);
   inputFreeze.value = true;
-
   try {
-    // Create assistant
-    const assistant = await openai.beta.assistants.create({
-      name: "Virtual Therapist",
-      instructions: "You are a Virtual Therapist.",
-      model: "gpt-3.5-turbo-0125",
+    const completion = await openai.chat.completions.create({
+      max_tokens: 1000,
+      messages: [
+        {
+          role: "system",
+          content: "I want you to act as a cognitive behavioural therapist...",
+        },
+        ...chats.value,
+        {
+          role: "user",
+          content: input,
+        },
+      ],
+      model: "gpt-3.5-turbo",
+      stream: false,
     });
-
-    // Create thread
-    const thread = { id: "thread_YN9Np0rKzWrcGTRve89nJBZl" };
-    console.log("thread id;-", thread);
-
-    // Send user message to the thread
-    const userMessage = await openai.beta.threads.messages.create(thread.id, {
-      role: "user",
-      content: input,
-    });
-
-    // Run the assistant
-    const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
-      assistant_id: assistant.id,
-      instructions: "u r my assistant",
-    });
-
-    if (run.status === "completed") {
-      // Get the messages from the thread
-      const messages = await openai.beta.threads.messages.list(run.thread_id);
-
-      // Log the messages
-      for (const message of messages.data.reverse()) {
-        console.log(`${message.role} > ${message.content[0].text.value}`);
-      }
-
-      // Extract the full response from the assistant
-      const assistantMessage = messages.data.find(
-        (message) => message.role === "assistant"
-      );
-      const fullResponse = assistantMessage.content[0].text.value;
-
-      // Push the response to the chats array
-      chats.value.push({ role: "system", content: fullResponse });
-
-      // Generate and play audio
-      await generateAndPlayAudio(fullResponse);
-    } else {
-      console.log(run.status);
-    }
 
     inputFreeze.value = false;
+    const fullResponse = completion.choices[0].message.content;
+    chats.value.push({ role: "system", content: fullResponse });
+    console.log(fullResponse);
+    await generateAndPlayAudio(fullResponse);
   } catch (error) {
     console.error("Error fetching ChatGPT response:", error);
-    inputFreeze.value = false;
   }
 };
 
@@ -282,5 +405,8 @@ const generateAndPlayAudio = async (text) => {
 }
 .audio-visualizer {
   height: 100% !important;
+}
+.none {
+  display: none;
 }
 </style>
