@@ -34,8 +34,8 @@ This resource is available to anyone seeking reliable information on these subje
 
 2. **Install Node Packages**
    ```bash
-  npm install
+   npm install
 
 3. **Run the project**
    ```bash
-  npm run dev
+   npm run dev
