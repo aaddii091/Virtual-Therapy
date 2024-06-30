@@ -5,7 +5,7 @@ Our Virtual Therapist project is designed to provide a comprehensive platform fo
 
 ## Components of Our Product
 
-### 1. Artificial Intelligence (Target ages ≤ 25 yrs.)
+### 1. Virtual Therapist (Target ages ≤ 25 yrs.)
 An AI-based chat and voice assistant that delivers Cognitive Behavioral Therapy (CBT) to users. It generates detailed reports based on user interactions, providing insights into their mental health.
 
 ### 2. Tests and Games (Target ages ≤ 25 yrs.)
