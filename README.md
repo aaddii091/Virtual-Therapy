@@ -23,23 +23,27 @@ This resource is available to anyone seeking reliable information on these subje
 ## How to Run the Project
 
 ### Prerequisites
+
 - Node.js installed on your machine
 
 ### Steps to Clone and Run the Project
 
 1. **Clone the repository**
+  
    ```bash
    git clone https://github.com/aaddii091/Virtual-Therapy.git
    cd virtual-therapist
 
 3. **Add API KEYS**
-   ```bash
-   .env
+
+- Refer example.env file
 
 3. **Install Node Packages**
+  
    ```bash
    npm install
 
 4. **Run the project**
+  
    ```bash
    npm run dev
