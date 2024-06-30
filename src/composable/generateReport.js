@@ -5,7 +5,7 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true,
 });
 
-const report = async (input) => {
+const report = async (input, userInfo) => {
   const prompt = `
   Based on the following chat, generate a therapy session report in JSON format with the following structure:
   {
@@ -47,9 +47,13 @@ const report = async (input) => {
   }
   Respond only with JSON formatted as described above.
 
-  Here are the chat logs:
+  
+  Here are the chat logs -
   ${input.map(chat => `${chat.role}: ${chat.content}`).join("\n")}
   `;
+
+
+ // ${userInfo.name} is the client name ,${userInfo.age} age and ${userInfo.gender} is the gender and below are the chat logs 
 
   const completion = await openai.chat.completions.create({
     max_tokens: 1000,

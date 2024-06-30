@@ -1,5 +1,5 @@
 <template>
-  <section class="bg-gray-50 dark:bg-gray-900">
+  <section class="bg-gray-50 dark:bg-gray-900 custom">
     <div
       class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0"
     >
@@ -121,7 +121,7 @@ const handleSubmit = async () => {
   if (!error.value) {
     if (profileExistence.value) {
       console.log(userObj.value);
-      // change this 
+      // change this
       if (!userObj.value.onBoarded === false) {
         router.push("/onboarding");
       } else {
@@ -135,4 +135,4 @@ const handleSubmit = async () => {
 };
 </script>
 
-<style></style>
+<style scoped></style>

@@ -1,7 +1,41 @@
-# Vue 3 + Vite
+# Virtual Therapist Project
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## Project Overview
+Our Virtual Therapist project is designed to provide a comprehensive platform for mental health support, targeting users aged 25 and below. The platform offers a range of features, including an AI-based chat and voice assistant, various tests and games to aid therapy, and a robust search engine for verified mental health information. Users can create an account and log in to access these features.
 
-## Recommended IDE Setup
+## Components of Our Product
 
-- [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (previously Volar) and disable Vetur
+### 1. Artificial Intelligence (Target ages ≤ 25 yrs.)
+An AI-based chat and voice assistant that delivers Cognitive Behavioral Therapy (CBT) to users. It generates detailed reports based on user interactions, providing insights into their mental health.
+
+### 2. Tests and Games (Target ages ≤ 25 yrs.)
+- **Tests:** Automate much of the manual work of psychoanalysts, allowing them to focus more on therapy sessions.
+- **Games:** Designed to improve mental health by reducing stress and enhancing concentration. These games contribute to the detailed AI-generated report.
+
+### 3. Search Engine
+A comprehensive search base for verified information on various mental health topics, including:
+- Mental illnesses
+- Support strategies for clients with mental health issues
+- More topics related to mental health
+
+This resource is available to anyone seeking reliable information on these subjects.
+
+## How to Run the Project
+
+### Prerequisites
+- Node.js installed on your machine
+
+### Steps to Clone and Run the Project
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/aaddii091/Virtual-Therapy.git
+   cd virtual-therapist
+
+2. **Install Node Packages**
+   ```bash
+  npm install
+
+3. **Run the project**
+   ```bash
+  npm run dev

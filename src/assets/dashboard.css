@@ -1,7 +1,7 @@
 * {
   margin: 0px;
   padding: 0px;
-  background-color: var(--background);
+  background-color: #0f0f0f;
 
   /* font-family: 'Open Sans', sans-serif; */
   font-family: "Roboto", sans-serif;
@@ -11,7 +11,7 @@
   cursor: pointer;
 }
 
-.container {
+.containers {
   border: 1.5px solid;
   height: calc(100vh - 7rem);
   margin: 1rem;

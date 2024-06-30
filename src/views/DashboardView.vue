@@ -5,7 +5,7 @@
       @customEvent="ToggleMic()"
       ref="startAudio"
     />
-    <div class="container" v-if="toggleState">
+    <div class="containers" v-if="toggleState">
       <div class="message-container no-scroll-display">
         <div class="messages" v-for="data in chats" :key="data.id">
           <!-- <MessageView :message="data.content" :role="data.role" /> -->
@@ -73,6 +73,12 @@ import generateReport from "../composable/generateReport";
 const store = useStore();
 
 // variables
+const userInfo = {
+  name: store.name,
+  age: store.age,
+  email: store.email,
+  gender: store.gender,
+};
 const toggleState = ref(store.toggleSidebarState);
 const audioStream = ref(null);
 const startAudio = ref(null);
@@ -125,7 +131,7 @@ const renderReport = async () => {
     "Thank you for the session. We are currently generating a comprehensive report, which will soon be available for download."
   );
 
-  const reportDetails = await report(chats.value);
+  const reportDetails = await report(chats.value, userInfo);
   console.log(reportDetails);
   const doc = new jsPDF();
 
@@ -158,18 +164,10 @@ const renderReport = async () => {
 
   doc.setFontSize(12);
   doc.setTextColor(50, 50, 50);
-  doc.text(
-    `• Name: ${formatText(reportDetails.clientInformation.name)}`,
-    20,
-    55
-  );
-  doc.text(`• Age: ${reportDetails.clientInformation.dateOfBirth}`, 20, 65);
-  doc.text(`• Gender: ${reportDetails.clientInformation.gender}`, 20, 75);
-  doc.text(
-    `• Email: ${formatText(reportDetails.clientInformation.email)}`,
-    20,
-    85
-  );
+  doc.text(`• Name: ${store.name}`, 20, 55);
+  doc.text(`• Age: ${store.age}`, 20, 65);
+  doc.text(`• Gender: ${store.gender}`, 20, 75);
+  doc.text(`• Email: ${formatText(store.email)}`, 20, 85);
 
   // Mental Health Overview
   doc.setFontSize(18);
@@ -295,7 +293,8 @@ const fetchResponse = async (input) => {
       messages: [
         {
           role: "system",
-          content: "I want you to act as a cognitive behavioural therapist...",
+          content:
+            "I want you to act as a cognitive behavioural therapist your name is zen and at first you will introduce yourself as a virtual therapist named zen you will not reply in more than 150 words , dont try to end the conversation and always try go keep the conversation going my asking questions",
         },
         ...chats.value,
         {
