@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="dashboard">
     <test-view
       class="audio-visualizer"
       @customEvent="ToggleMic()"
@@ -340,6 +340,12 @@ const generateAndPlayAudio = async (text) => {
 </script>
 
 <style scoped>
+.search-bar,
+.search-inner,
+input,
+.icons {
+  background-color: #232d3f !important;
+}
 @import url("../assets/dashboard.css");
 .messages {
   background-color: rgba(240, 248, 255, 0);

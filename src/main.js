@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
-import './index.css'
 import { createPinia } from 'pinia';
+import './index.css'
 import App from './App.vue'
 import router from './router/index.js'
 import PhosphorIcons from "@phosphor-icons/vue" 
