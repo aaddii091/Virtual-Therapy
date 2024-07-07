@@ -8,7 +8,8 @@ export const useStore = defineStore("store", {
     name: "Aditya Saxena",
     age: 21,
     gender: "Male",
-    email:'aaddii091@gmail.com'
+    email: 'aaddii091@gmail.com',
+    responseStatus: true
   }),
   getters: {
     doubleCount: (state) => state.count * 2,
@@ -22,6 +23,9 @@ export const useStore = defineStore("store", {
     },
     triggerRunFunction() {
       this.runFunction();
+    },
+    updateResponseStatus(val) {
+     this.responseStatus = val
     },
   },
 });

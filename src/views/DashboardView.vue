@@ -34,7 +34,11 @@
     <form @submit.prevent="messageSent()" v-if="!toggleState">
       <div class="search-bar">
         <div class="search-inner">
-          <input type="text" v-model="inputText" />
+          <input
+            type="text"
+            v-model="inputText"
+            :disabled="!responseCompleted ? true : false"
+          />
           <ph-microphone
             :size="32"
             class="icons"
@@ -68,6 +72,7 @@ import { useStore } from "../store/store";
 import "../assets/dashboard.css";
 import { jsPDF } from "jspdf";
 import generateReport from "../composable/generateReport";
+import { computed } from "vue";
 
 // initializing store
 const store = useStore();
@@ -85,6 +90,9 @@ const startAudio = ref(null);
 const inputFreeze = ref(false);
 const chats = ref([]);
 const inputText = ref("");
+const responseCompleted = computed(() => {
+  return store.responseStatus;
+});
 
 console.log(chats.value.length);
 
@@ -260,7 +268,7 @@ const renderReport = async () => {
 const ToggleMic = () => {
   console.log("ToggleMic called");
   console.log("isRecording before:", isRecording.value);
-  if (isRecording.value) {
+  if (!responseCompleted.value) {
     sr.stop();
   } else {
     sr.start();
@@ -270,6 +278,8 @@ const ToggleMic = () => {
 
 const messageSent = () => {
   if (inputText.value !== "" && !inputFreeze.value) {
+    store.updateResponseStatus(false);
+    console.log(store.responseStatus, "RESPONSSSSSSSSE");
     fetchResponse(inputText.value);
     chats.value.push({ role: "user", content: inputText.value });
     inputText.value = "";
@@ -373,7 +383,7 @@ input,
   display: flex;
   position: absolute;
   bottom: 0px;
-    width: -webkit-fill-available;
+  width: -webkit-fill-available;
   height: 3rem;
   border-radius: 25px;
   margin: 1rem 0.75rem;

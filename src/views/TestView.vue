@@ -67,6 +67,10 @@ function onStream(audio) {
   analyser.connect(context.destination);
   requestAnimationFrame(visualize);
   audio.play();
+  audio.addEventListener("ended", () => {
+    console.log("Audio has finished playing");
+    store.updateResponseStatus(true);
+  });
 }
 
 function range(i) {
@@ -194,5 +198,10 @@ button:hover {
   transition: all 0.5s;
   padding: 0.65em 1.75em;
   box-shadow: rgba(255, 255, 255, 0.2) 0px 7px 29px 0px;
+}
+@media screen and (max-width: 480px) {
+  button {
+    font-size: 7vw;
+  }
 }
 </style>
