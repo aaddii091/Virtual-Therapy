@@ -51,7 +51,7 @@
             :size="32"
             class="icons"
             @click="renderReport()"
-            :class="chats.length !== 4 ? '' : 'none'"
+            :class="chats.length > 4 ? '' : 'none'"
           />
         </div>
       </div>
@@ -373,14 +373,14 @@ input,
   display: flex;
   position: absolute;
   bottom: 0px;
-  width: calc(100vw - 4rem);
+    width: -webkit-fill-available;
   height: 3rem;
   border-radius: 25px;
   margin: 1rem 0.75rem;
   background-color: var(--background);
 }
 .search-bar input {
-  width: calc(100vw - 2rem);
+  width: 100%;
   height: 3rem;
   border: 0px;
   border-radius: 25px;
