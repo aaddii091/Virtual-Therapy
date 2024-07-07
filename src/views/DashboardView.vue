@@ -33,6 +33,7 @@
     </div>
     <form @submit.prevent="messageSent()" v-if="!toggleState">
       <div class="search-bar">
+        <div class="loader" v-if="loader"></div>
         <div class="search-inner">
           <input
             type="text"
@@ -88,6 +89,7 @@ const toggleState = ref(store.toggleSidebarState);
 const audioStream = ref(null);
 const startAudio = ref(null);
 const inputFreeze = ref(false);
+const loader = ref(false);
 const chats = ref([]);
 const inputText = ref("");
 const responseCompleted = computed(() => {
@@ -278,6 +280,7 @@ const ToggleMic = () => {
 
 const messageSent = () => {
   if (inputText.value !== "" && !inputFreeze.value) {
+    loader.value= true
     store.updateResponseStatus(false);
     console.log(store.responseStatus, "RESPONSSSSSSSSE");
     fetchResponse(inputText.value);
@@ -342,6 +345,7 @@ const generateAndPlayAudio = async (text) => {
     store.updateAudio(audioStream);
     store.updateMic(true);
     console.log(startAudio.value);
+    loader.value=false
     startAudio.value.start();
   } catch (error) {
     console.error("An error occurred:", error);

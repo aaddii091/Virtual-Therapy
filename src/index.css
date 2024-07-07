@@ -8,3 +8,32 @@
 body {
   background-color: #0f0f0f;
 }
+
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: 15px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  animation: l5 1s infinite linear alternate;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+}
+@keyframes l5 {
+  0% {
+    box-shadow: 20px 0 #ffffff, -20px 0 rgba(255, 255, 255, 0.133);
+    background: #ffffff;
+  }
+  33% {
+    box-shadow: 20px 0 #000, -20px 0 rgba(255, 255, 255, 0.133);
+    background: rgba(255, 255, 255, 0.133);
+  }
+  66% {
+    box-shadow: 20px 0 rgba(255, 255, 255, 0.133), -20px 0 #ffffff;
+    background: rgba(255, 255, 255, 0.133);
+  }
+  100% {
+    box-shadow: 20px 0 #0002, -20px 0 #000;
+    background: #000;
+  }
+}
